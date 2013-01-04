@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- POM Relationships -->
+
+  <parent>
+	<groupId>org.sonatype.oss</groupId>
+	<artifactId>oss-parent</artifactId>
+	<version>7</version>
+  </parent>
+
+  <groupId>com.datasalt.pangool</groupId>
+  <version>0.1-SNAPSHOT</version>
+
+  <artifactId>pangool-flow</artifactId>
+  <packaging>jar</packaging>
+
+  <name>Pangool-Flow</name>
+  <description>Pangool-Flow is an experimental module on top of Pangool (http://pangool.net) which adds automatic flow building and management. Pangool-Flow adds a higher-level layer on top of Pangool by implementing "Ops" so that the most common operations can be implemented much quicker, while retaining all of Pangool's flexibility and low-levelness (it is still possible to implement raw Mapper, Reducer and Combiner instances in any of the Flow's Jobs).</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <pangool.skip.example>false</pangool.skip.example>
+  </properties>
+  
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <source>1.6</source>
+          <target>1.6</target>
+          <optimize>true</optimize>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+    
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.4</version>
+    </dependency>
+  
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.4</version>
+      <scope>test</scope>
+    </dependency>
+  
+    <!-- Pangool -->
+    <dependency>
+      <groupId>com.datasalt.pangool</groupId>
+      <artifactId>pangool-core</artifactId> 
+      <version>0.50.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+      <scope>test</scope>
+    </dependency>
+ </dependencies>
+
+  <profiles>
+    <profile>
+      <id>release.prepare</id>
+      <properties>
+        <pangool.skip.example>true</pangool.skip.example>
+      </properties>
+    </profile>
+  </profiles>
+</project>
