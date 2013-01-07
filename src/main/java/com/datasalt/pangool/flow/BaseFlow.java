@@ -69,12 +69,24 @@ public abstract class BaseFlow implements Serializable {
 
 	public Step findInOutputs(String output) {
 		for(Step job : jobContext.values()) {
-			if(output.equals(job.getOutputName())) {
+			String jobOutput = job.getOutputName();
+			if(output.equals(jobOutput)) {
 				return job;
 			}
-			for(String namedOutput : job.getNamedOutputs()) {
-				if(job.getNamedOutputName(namedOutput).equals(output)) {
+			if(bindings.get(jobOutput) != null) {
+				if(output.equals(bindings.get(jobOutput))) {
 					return job;
+				}
+			}
+			for(String namedOutput : job.getNamedOutputs()) {
+				String namedOutputName = job.getNamedOutputName(namedOutput);
+				if(namedOutputName.equals(output)) {
+					return job;
+				}
+				if(bindings.get(namedOutputName) != null) {
+					if(bindings.get(namedOutputName).equals(output)) {
+						return job;
+					}
 				}
 			}
 		}
@@ -160,11 +172,11 @@ public abstract class BaseFlow implements Serializable {
 
 			if(stepsToExecuteInParallel.size() > 0) {
 				Log.info("Launching parallel steps [" + stepsToExecuteInParallel + "]");
-				
+
 				for(final Step job : stepsToExecuteInParallel) {
 					stepsBeingExecuted.add(executor.submit(new Runnable() {
 						@Override
-	          public void run() {
+						public void run() {
 							try {
 								List<String> args = new ArrayList<String>();
 								for(Param param : job.getParameters()) {
@@ -185,21 +197,26 @@ public abstract class BaseFlow implements Serializable {
 									args.add("--" + input.name);
 									String bindedTo = bindings.get(inputName);
 									Step jOutput = jobOutputBindings.get(inputName);
-									if(jOutput != null) {
-										// sometimes we need to rewrite the path expression to avoid conflicts
-										if(jOutput.namedOutputs.size() > 0) {
-											if(bindedTo.endsWith(".output")) { // main output of a named output job
-												// rebind to glob expression
-												bindedTo = bindedTo + "/part*";
-											} else { // a named output
-												// rebind to glob expression
-												int lastPoint = bindedTo.lastIndexOf(".");
-												String namedOutput = bindedTo.substring(lastPoint + 1, bindedTo.length());
-												bindedTo = bindedTo.substring(0, lastPoint) + "/" + namedOutput;
+									String outputBindedTo = bindings.get(bindedTo);
+									if(outputBindedTo == null) {
+										if(jOutput != null) {
+											// sometimes we need to rewrite the path expression to avoid conflicts
+											if(jOutput.namedOutputs.size() > 0) {
+												if(bindedTo.endsWith(".output")) { // main output of a named output job
+													// rebind to glob expression
+													bindedTo = bindedTo + "/part*";
+												} else { // a named output
+													// rebind to glob expression
+													int lastPoint = bindedTo.lastIndexOf(".");
+													String namedOutput = bindedTo.substring(lastPoint + 1, bindedTo.length());
+													bindedTo = bindedTo.substring(0, lastPoint) + "/" + namedOutput;
+												}
 											}
 										}
+										args.add(bindedTo);
+									} else {
+										args.add(outputBindedTo);
 									}
-									args.add(bindedTo);
 								}
 								args.add("--output");
 								// Output = outputName if it's not binded
@@ -220,12 +237,12 @@ public abstract class BaseFlow implements Serializable {
 								t.printStackTrace();
 								flowFailed.set(true);
 							}
-	          }
+						}
 					}, job));
 					stepDependencies.remove(job);
 				}
 			}
-			
+
 			// Wait until some job finishes, whichever one
 			Set<Future<Step>> stepsThatFinished = new HashSet<Future<Step>>();
 
@@ -233,10 +250,10 @@ public abstract class BaseFlow implements Serializable {
 				Thread.sleep(1000);
 
 				if(flowFailed.get()) {
-					throw new RuntimeException("Flow failed!");				
+					throw new RuntimeException("Flow failed!");
 				}
 
-				for(Future<Step> stepBeingExecuted: stepsBeingExecuted) {
+				for(Future<Step> stepBeingExecuted : stepsBeingExecuted) {
 					if(stepBeingExecuted.isDone()) {
 						Step doneStep = stepBeingExecuted.get();
 						Log.info("Step done: [" + doneStep + "]");
@@ -244,11 +261,12 @@ public abstract class BaseFlow implements Serializable {
 						stepsThatFinished.add(stepBeingExecuted);
 					}
 				}
-				
+
 				stepsBeingExecuted.removeAll(stepsThatFinished);
-			};
+			}
+			;
 		}
-		
+
 		// Wait until everything is finished
 		// This is not very DRY - can it be improved?
 		Set<Future<Step>> stepsThatFinished = new HashSet<Future<Step>>();
@@ -257,18 +275,21 @@ public abstract class BaseFlow implements Serializable {
 			Thread.sleep(1000);
 
 			if(flowFailed.get()) {
-				throw new RuntimeException("Flow failed!");				
+				throw new RuntimeException("Flow failed!");
 			}
 
-			for(Future<Step> stepBeingExecuted: stepsBeingExecuted) {
+			for(Future<Step> stepBeingExecuted : stepsBeingExecuted) {
 				if(stepBeingExecuted.isDone()) {
 					Step doneStep = stepBeingExecuted.get();
 					Log.info("Step done: [" + doneStep + "]");
 					stepsThatFinished.add(stepBeingExecuted);
 				}
 			}
-			
+
 			stepsBeingExecuted.removeAll(stepsThatFinished);
-		};
+		}
+		;
+
+		executor.shutdownNow();
 	}
 }

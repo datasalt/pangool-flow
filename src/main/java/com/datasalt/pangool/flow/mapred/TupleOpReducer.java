@@ -23,53 +23,51 @@ import com.datasalt.pangool.flow.ops.Op;
 import com.datasalt.pangool.flow.ops.ReturnCallback;
 import com.datasalt.pangool.flow.ops.TupleReduceOp;
 import com.datasalt.pangool.io.ITuple;
-import com.datasalt.pangool.io.Schema;
 import com.datasalt.pangool.tuplemr.TupleMRException;
+import com.datasalt.pangool.tuplemr.TupleReducer;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "rawtypes", "unchecked" })
 /**
  * Reducer to be used to execute one {@link Op} or {@link ChainOp}. Removes the need of implementing a reducer.
  * It can be used with {@link TupleOutput}s. 
  */
-public class TupleOpReducer extends SingleSchemaReducer {
+public class TupleOpReducer extends TupleReducer<ITuple, NullWritable> {
 
-	Op<Iterable<ITuple>, ITuple> op;
-	Collector collector;
-	
+	private Op<Iterable<ITuple>, ITuple> op;
+	private Collector collector;
+
 	public TupleOpReducer(TupleReduceOp op) {
-	  super();
-	  this.op = (Op<Iterable<ITuple>, ITuple>)op;
-  }
-	
-	public TupleOpReducer(Op<Iterable<ITuple>, ITuple> op, Schema outSchema) {
-		super(outSchema);
+		super();
+		this.op = (Op<Iterable<ITuple>, ITuple>) op;
+	}
+
+	public TupleOpReducer(Op<Iterable<ITuple>, ITuple> op) {
 		this.op = op;
 	}
-	
-	public void setup(TupleMRContext tupleMRContext, Collector collector) throws IOException ,InterruptedException ,TupleMRException {
+
+	public void setup(TupleMRContext tupleMRContext, Collector collector) throws IOException,
+	    InterruptedException, TupleMRException {
 		this.collector = collector;
 	};
 
 	ReturnCallback<ITuple> callback = new ReturnCallback<ITuple>() {
 
 		@Override
-    public void onReturn(ITuple element) {
-	    if(element != null) {
-	    	try {
-	        collector.write(element, NullWritable.get());
-        } catch(IOException e) {
-	        throw new RuntimeException(e);
-        } catch(InterruptedException e) {
-	        throw new RuntimeException(e);
-        }
-	    }
-    }
+		public void onReturn(ITuple element) {
+			if(element != null) {
+				try {
+					collector.write((ITuple) element, NullWritable.get());
+				} catch(IOException e) {
+					throw new RuntimeException(e);
+				} catch(InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
 	};
-	
-	@Override
-	public void reduce(ITuple group, Iterable<ITuple> tuples, TupleMRContext context, Collector collector)
-	    throws IOException, InterruptedException, TupleMRException {
-		
+
+	public void reduce(ITuple group, Iterable<ITuple> tuples, TupleReducer.TupleMRContext context,
+	    Collector collector) throws IOException, InterruptedException, TupleMRException {
 		op.process(tuples, callback);
-	}
+	};
 }
