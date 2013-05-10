@@ -1,0 +1,6 @@
+.classpath
+.project
+.settings
+clojure-src.jar
+clojure.jar
+target

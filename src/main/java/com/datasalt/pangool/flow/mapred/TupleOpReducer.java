@@ -26,7 +26,7 @@ import com.datasalt.pangool.io.ITuple;
 import com.datasalt.pangool.tuplemr.TupleMRException;
 import com.datasalt.pangool.tuplemr.TupleReducer;
 
-@SuppressWarnings({ "serial", "rawtypes", "unchecked" })
+@SuppressWarnings({ "serial" })
 /**
  * Reducer to be used to execute one {@link Op} or {@link ChainOp}. Removes the need of implementing a reducer.
  * It can be used with {@link TupleOutput}s. 

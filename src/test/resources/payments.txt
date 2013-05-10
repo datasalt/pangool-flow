@@ -1,0 +1,5 @@
+ChocoFlakes	3.15	EUR	22:10	01/01/2013	Jon
+LongBeer	5.25	EUR	22:10	01/01/2013	Jon
+CrispChips	0.95	EUR	22:10	01/01/2013	Jon
+CrispChips	0.95	EUR	22:13	01/01/2013	Mary
+GoodRedWine	5.95	EUR	22:13	01/01/2013	Mary
