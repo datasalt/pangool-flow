@@ -15,9 +15,17 @@
  */
 package com.datasalt.pangool.flow;
 
+import com.datasalt.pangool.io.Schema;
+
 public class ResourceMRInput implements MRInput {
 
 	String resourceName;
+	Schema schema = null;
+	
+	public ResourceMRInput(String resourceName, Schema schema) {
+		this.resourceName = resourceName;
+		this.schema = schema;
+	}
 	
 	public ResourceMRInput(String resourceName) {
 		this.resourceName = resourceName;
@@ -26,5 +34,10 @@ public class ResourceMRInput implements MRInput {
 	@Override
   public String getId() {
 	  return resourceName;
+  }
+
+	@Override
+  public Schema getSchema() {
+	  return schema;
   }
 }

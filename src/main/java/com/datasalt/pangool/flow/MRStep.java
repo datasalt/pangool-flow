@@ -88,8 +88,8 @@ public class MRStep {
 		extraDependencies.add(operativeStep);
 	}
 	
-	public void addInput(MRInput mrInput, Schema tupleSchemaInput) {
-		addInput(mrInput, new TupleInput(tupleSchemaInput));
+	public void addInput(MRInput mrInput) {
+		addInput(mrInput, new TupleInput(mrInput.getSchema()));
 	}
 	
 	public void addInput(MRInput mrInput, RichInput inputSpec) {
@@ -104,12 +104,21 @@ public class MRStep {
 	
 	public MRInput setOutput(RichOutput outputSpec) {
 		jobOutput = outputSpec;
-		return new JobOutputMRInput(name);
+		if(outputSpec instanceof TupleOutput) {
+			System.err.println("return a schema : " + ((TupleOutput)outputSpec).getOutputSchema());
+			return new JobOutputMRInput(name, ((TupleOutput)outputSpec).getOutputSchema());						
+		} else {
+			return new JobOutputMRInput(name, null);			
+		}
 	}
 
 	public MRInput setOutput(String name, RichOutput outputSpec) {
 		bindedOutputs.put(name, outputSpec);
-		return new JobOutputMRInput(this.name, name);
+		if(outputSpec instanceof TupleOutput) {
+			return new JobOutputMRInput(this.name, name, ((TupleOutput)outputSpec).getOutputSchema());
+		} else {
+			return new JobOutputMRInput(this.name, name, null);
+		}
 	}
 
 	public void setReducer(TupleReducer reducer) {

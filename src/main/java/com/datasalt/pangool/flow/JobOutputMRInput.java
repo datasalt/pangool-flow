@@ -15,6 +15,8 @@
  */
 package com.datasalt.pangool.flow;
 
+import com.datasalt.pangool.io.Schema;
+
 /**
  * Abstraction of an input which is derived from a property of a Job. This property can be the main output or a named
  * output.
@@ -23,14 +25,16 @@ public class JobOutputMRInput implements MRInput {
 
 	String jobName;
 	String name;
+	Schema schema;
 
-	public JobOutputMRInput(String jobName) {
-		this(jobName, "output");
+	public JobOutputMRInput(String jobName, Schema schema) {
+		this(jobName, "output", schema);
 	}
 
-	public JobOutputMRInput(String jobName, String name) {
+	public JobOutputMRInput(String jobName, String name, Schema schema) {
 		this.jobName = jobName;
 		this.name = name;
+		this.schema = schema;
 	}
 
 	/**
@@ -40,4 +44,9 @@ public class JobOutputMRInput implements MRInput {
 	public String getId() {
 		return jobName + "." + name;
 	}
+
+	@Override
+  public Schema getSchema() {
+	  return schema;
+  }
 }

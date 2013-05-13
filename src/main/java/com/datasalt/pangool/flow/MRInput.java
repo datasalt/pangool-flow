@@ -15,7 +15,10 @@
  */
 package com.datasalt.pangool.flow;
 
+import com.datasalt.pangool.io.Schema;
+
 public interface MRInput {
 
 	public String getId();
+	public Schema getSchema();
 }
