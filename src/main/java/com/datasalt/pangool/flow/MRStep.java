@@ -92,6 +92,10 @@ public class MRStep {
 		addInput(mrInput, new TupleInput(mrInput.getSchema()));
 	}
 	
+	public void addInput(MRInput mrInput, Schema schema) {
+		addInput(mrInput, new TupleInput(schema));
+	}
+	
 	public void addInput(MRInput mrInput, RichInput inputSpec) {
 		String inputName = "input" + bindedInputs.keySet().size();
 		bindedInputs.put(inputName, inputSpec);
